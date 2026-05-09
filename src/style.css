@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #0f0f0f;
+  --color-card: #1a1a1a;
+  --color-accent: #e8b923;
+  --color-accent-hover: #f5cb3f;
+  --color-low-accent: #d0c5af;
+  --color-muted: #888888;
+  --color-border: #2a2a2a;
+
+  --font-heading: 'Epilogue', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+body {
+  background-color: #131313;
+  color: white;
+  font-family: var(--font-body);
+  ::selection {
+    background-color: #e8b923;
+    color: #000;
+  }
+}
