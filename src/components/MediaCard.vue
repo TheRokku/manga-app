@@ -11,6 +11,25 @@
     "
     class="relative bg-bg shadow-2xl w-72 h-96 rounded-md overflow-hidden font-heading hover:*:bg-bg/80 xl:hover:scale-x-105 xl:hover:scale-y-105 xl:hover:z-20 xl:hover:-rotate-1 xl:hover:*:rotate-0 xl:hover:shadow-accent/40 transition-all hover:cursor-pointer border-2 border-border hover:border-accent-hover hover:border-4"
   >
+    <button
+      @click.stop="toggleFavorite"
+      class="absolute top-2 left-2 z-10 bg-bg/80 p-1.5 rounded-md hover:bg-accent/20 hover:cursor-pointer transition-colors"
+    >
+      <Heart
+        :size="16"
+        :fill="
+          favoritesStore.isFavorite(media.id, media.type ?? 'MANGA')
+            ? 'currentColor'
+            : 'none'
+        "
+        class="transition-colors"
+        :class="
+          favoritesStore.isFavorite(media.id, media.type ?? 'MANGA')
+            ? 'text-accent'
+            : 'text-white'
+        "
+      />
+    </button>
     <div
       v-if="media.averageScore"
       class="absolute top-2 right-2 z-10 bg-bg/80 px-2 py-1 rounded-md flex items-center gap-1 h-8"
@@ -57,20 +76,39 @@
 </template>
 
 <script setup>
-import { Type } from 'lucide-vue-next';
-import { Star } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '../stores/user.js';
+import { useFavoritesStore } from '../stores/favorites.js';
+import { Star, Heart } from 'lucide-vue-next';
 
 const router = useRouter();
+const userStore = useUserStore();
+const favoritesStore = useFavoritesStore();
 
-defineProps({
-  media: {
-    type: Object,
-    required: true,
-  },
-  selectedGenres: {
-    type: Array,
-    required: true,
-  },
+const props = defineProps({
+  media: { type: Object, required: true },
+  selectedGenres: { type: Array, default: () => [] },
 });
+
+function toggleFavorite() {
+  if (!userStore.user) {
+    router.push('/login');
+    return;
+  }
+  const mediaType = props.media.type ?? 'MANGA';
+  if (favoritesStore.isFavorite(props.media.id, mediaType)) {
+    if (!confirm('Remove from your archive?')) return;
+    favoritesStore.removeFavorite({
+      userId: userStore.user.id,
+      mediaId: props.media.id,
+      mediaType,
+    });
+  } else {
+    favoritesStore.addFavorite({
+      userId: userStore.user.id,
+      mediaId: props.media.id,
+      mediaType,
+    });
+  }
+}
 </script>

@@ -27,6 +27,27 @@
       <div class="flex flex-col md:flex-row gap-8 px-8 py-10">
         <!-- Cover -->
         <div class="relative shrink-0">
+          <button
+            @click.stop="toggleFavorite"
+            class="absolute top-2 left-2 z-10 rounded-md hover:bg-accent/20 hover:cursor-pointer transition-colors"
+          >
+            <Heart
+              :size="30"
+              :color="'#e8b923'"
+              stroke-width="3"
+              :fill="
+                favoritesStore.isFavorite(mangaDetail.id, 'MANGA')
+                  ? 'currentColor'
+                  : 'none'
+              "
+              :class="
+                favoritesStore.isFavorite(mangaDetail.id, 'MANGA')
+                  ? 'text-accent'
+                  : 'text-white'
+              "
+              class="transition-colors"
+            />
+          </button>
           <img
             :src="mangaDetail.coverImage.large"
             class="w-52 md:w-64 rounded-sm object-cover"
@@ -155,14 +176,18 @@
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue';
+import MediaCard from '../../components/MediaCard.vue';
+import { onMounted, watch, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useManga } from '../../composables/useManga.js';
-import { ArrowLeft, Play, Plus } from 'lucide-vue-next';
-import MediaCard from '../../components/MediaCard.vue';
+import { ArrowLeft, Play, Plus, Star, Heart } from 'lucide-vue-next';
+import { useUserStore } from '../../stores/user.js';
+import { useFavoritesStore } from '../../stores/favorites.js';
 
 const route = useRoute();
 const router = useRouter();
+const userStore = useUserStore();
+const favoritesStore = useFavoritesStore();
 const { mangaDetail, loading, error, fetchManga } = useManga();
 
 watch(
@@ -174,9 +199,30 @@ watch(
   },
 );
 
+function toggleFavorite() {
+  if (!userStore.user) {
+    router.push('/login');
+    return;
+  }
+  if (favoritesStore.isFavorite(mangaDetail.value.id, 'MANGA')) {
+    if (!confirm('Remove from your archive?')) return;
+    favoritesStore.removeFavorite({
+      userId: userStore.user.id,
+      mediaId: mangaDetail.value.id,
+      mediaType: 'MANGA',
+    });
+  } else {
+    favoritesStore.addFavorite({
+      userId: userStore.user.id,
+      mediaId: mangaDetail.value.id,
+      mediaType: 'MANGA',
+    });
+  }
+}
+
 onMounted(() => {
   fetchManga({ id: parseInt(route.params.id) });
 });
 
-let trailer = false;
+const trailer = ref(false);
 </script>
