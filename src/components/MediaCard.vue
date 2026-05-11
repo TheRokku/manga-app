@@ -47,7 +47,7 @@
           v-for="g in media.genres"
           @click.stop="selectedGenres.push(g)"
           :key="g"
-          class="bg-card/90 p-1 px-3 rounded-md text-sm font-semibold text-nowrap text-center text-body"
+          class="border border-accent text-accent text-xs font-bold px-3 py-1 text-nowrap rounded-sm tracking-wider hover:bg-accent hover:text-bg transition-colors"
         >
           {{ g }}
         </li>
