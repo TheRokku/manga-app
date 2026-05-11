@@ -1,6 +1,9 @@
 <template>
-  <MediaCard v-for="m in manga" :key="m.id" :manga="m" />
+  <div>
+    <h1 class="font-heading font-black text-center text-accent text-5xl p-10">
+      Home
+    </h1>
+  </div>
 </template>
-<script setup>
-import MediaCard from '../components/MediaCard.vue';
-</script>
+
+<script setup></script>

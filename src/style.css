@@ -18,9 +18,61 @@
 body {
   background-color: #131313;
   color: white;
+  overflow-x: hidden;
   font-family: var(--font-body);
   ::selection {
     background-color: #e8b923;
     color: #000;
+  }
+}
+.glitch-enter-active {
+  animation: glitch-in 0.5s steps(1) forwards;
+}
+
+.glitch-leave-active {
+  animation: glitch-out 0.3s steps(1) forwards;
+}
+
+.glitch-enter-active {
+  animation: glitch-in 0.4s steps(2) forwards;
+}
+
+.glitch-leave-active {
+  animation: glitch-out 0.25s steps(2) forwards;
+}
+
+@keyframes glitch-out {
+  0% {
+    opacity: 1;
+    transform: translate(0);
+    filter: brightness(1);
+  }
+  50% {
+    transform: translate(3px, 0);
+    filter: brightness(1.5) hue-rotate(45deg);
+    clip-path: inset(30% 0 20% 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0);
+    filter: brightness(2);
+  }
+}
+
+@keyframes glitch-in {
+  0% {
+    opacity: 0;
+    transform: translate(-3px, 0);
+    filter: brightness(2) hue-rotate(90deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translate(3px, 0);
+    filter: brightness(1.5) hue-rotate(45deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0);
+    filter: brightness(1) hue-rotate(0deg);
   }
 }
