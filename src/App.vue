@@ -1,4 +1,5 @@
 <template>
+  <SpeedInsights />
   <div v-if="!userStore.loading">
     <Navbar />
     <RouterView v-slot="{ Component }">
@@ -13,6 +14,7 @@
 </template>
 
 <script setup>
+import { SpeedInsights } from '@vercel/speed-insights/vue';
 import Navbar from './components/Navbar.vue';
 import { onMounted, watch } from 'vue';
 import { useUserStore } from './stores/user.js';
