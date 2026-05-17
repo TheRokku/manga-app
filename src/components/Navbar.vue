@@ -97,7 +97,7 @@
       >BROWSE MANGA</RouterLink
     >
     <RouterLink
-      to="/manga"
+      to="/anime"
       class="hover:text-accent transition-all"
       @click="menuOpen = false"
       >BROWSE ANIME</RouterLink
