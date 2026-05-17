@@ -2,8 +2,10 @@
   <div
     @click="
       () => {
-        console.log('clicked', media.id);
-        router.push(`/manga/${media.id}`);
+        console.log('clicked', media.id, router.currentRoute.value.params);
+        router.push(
+          `/${router.currentRoute.value.path.includes('manga') ? 'manga' : 'anime'}/${media.id}`,
+        );
       }
     "
     :title="
@@ -18,13 +20,13 @@
       <Heart
         :size="16"
         :fill="
-          favoritesStore.isFavorite(media.id, media.type ?? 'MANGA')
+          favoritesStore.isFavorite(media.id, mediaType)
             ? 'currentColor'
             : 'none'
         "
         class="transition-colors"
         :class="
-          favoritesStore.isFavorite(media.id, media.type ?? 'MANGA')
+          favoritesStore.isFavorite(media.id, mediaType)
             ? 'text-accent'
             : 'text-white'
         "
@@ -79,7 +81,8 @@
 import { useRouter } from 'vue-router';
 import { useUserStore } from '../stores/user.js';
 import { useFavoritesStore } from '../stores/favorites.js';
-import { Star, Heart } from 'lucide-vue-next';
+import { Star, Heart, Magnet } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -89,6 +92,12 @@ const props = defineProps({
   media: { type: Object, required: true },
   selectedGenres: { type: Array, default: () => [] },
 });
+
+const mediaType = computed(
+  () =>
+    props.media.type ||
+    (router.currentRoute.value.path.includes('manga') ? 'MANGA' : 'ANIME'),
+);
 
 function toggleFavorite() {
   if (!userStore.user) {

@@ -19,7 +19,7 @@
           @click="router.back()"
           class="flex items-center gap-2 text-muted hover:text-accent transition-colors text-sm font-heading font-bold tracking-widest"
         >
-          <ArrowLeft :size="16" /> RETURN TO DATABASE
+          <ArrowLeft :size="16" /> RETURN
         </button>
       </div>
 

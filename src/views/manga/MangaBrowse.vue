@@ -38,8 +38,17 @@
         </div>
 
         <!-- Filters -->
+        <button
+          class="w-fit p-2 rounded-md block ml-auto hover:bg-accent-hover hover:text-bg hover:cursor-pointer transition-colors"
+          @click="isFiltersOpen = !isFiltersOpen"
+          :class="isFiltersOpen ? 'bg-accent text-bg' : 'bg-border'"
+          title="Open Filters"
+        >
+          <SlidersHorizontal />
+        </button>
         <div
           class="flex flex-row bg-[#1C1C1C] pb-4 gap-2 mt-2 not-landscape:flex-col"
+          :class="isFiltersOpen ? 'flex ' : 'hidden '"
         >
           <!-- Genre & Tags -->
           <div class="flex flex-col gap-1 overflow-visible">
@@ -407,7 +416,7 @@ import { onMounted, ref, watch, toRaw } from 'vue';
 import { useManga } from '../../composables/useManga.js';
 import { useDebounceFn, onClickOutside } from '@vueuse/core';
 import { useGenres } from '../../composables/useGenres.js';
-import { Search, Delete } from 'lucide-vue-next';
+import { Search, Delete, SlidersHorizontal } from 'lucide-vue-next';
 import { useTags } from '../../composables/useTags.js';
 import { useRoute } from 'vue-router';
 
@@ -426,6 +435,7 @@ const selectedStatus = ref(null);
 const selectedCountry = ref(null);
 const selectedFormat = ref([]);
 
+const isFiltersOpen = ref(false);
 const isOpen = ref(false);
 const isSortOpen = ref(false);
 const isStatusOpen = ref(false);

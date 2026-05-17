@@ -17,11 +17,36 @@
       <RouterLink to="/" class="nav-link hover:text-accent-hover transition-all"
         >HOME</RouterLink
       >
-      <RouterLink
-        to="/manga"
-        class="nav-link hover:text-accent-hover transition-all"
-        >BROWSE</RouterLink
-      >
+      <div>
+        <div class="relative group inline-block">
+          <p
+            class="hover:text-accent-hover transition-all nav-link hover:cursor-pointer"
+          >
+            BROWSE
+          </p>
+
+          <div
+            class="absolute -left-1/2 top-full pt-2 scale-0 group-hover:scale-100 group-focus:scale-100 transition-all z-50"
+          >
+            <div class="flex flex-col gap-2 bg-bg/90 p-3 rounded-sm min-w-max">
+              <RouterLink
+                to="/manga"
+                class="nav-link hover:text-accent-hover transition-all"
+              >
+                BROWSE MANGA
+              </RouterLink>
+
+              <RouterLink
+                to="/anime"
+                class="nav-link hover:text-accent-hover transition-all"
+              >
+                BROWSE ANIME
+              </RouterLink>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <RouterLink
         to="/profile"
         class="nav-link hover:text-accent-hover transition-all"
@@ -36,7 +61,7 @@
 
     <!-- Desktop Icons -->
     <div class="hidden md:flex items-center gap-4">
-      <RouterLink to="/notifications" class="hover:text-accent transition-all">
+      <RouterLink to="/profile" class="hover:text-accent transition-all">
         <Bell :size="22" :strokeWidth="2.5" />
       </RouterLink>
       <RouterLink to="/profile" class="hover:text-accent transition-all">
@@ -69,7 +94,13 @@
       to="/manga"
       class="hover:text-accent transition-all"
       @click="menuOpen = false"
-      >BROWSE</RouterLink
+      >BROWSE MANGA</RouterLink
+    >
+    <RouterLink
+      to="/manga"
+      class="hover:text-accent transition-all"
+      @click="menuOpen = false"
+      >BROWSE ANIME</RouterLink
     >
     <RouterLink
       to="/profile"

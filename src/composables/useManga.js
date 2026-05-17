@@ -55,8 +55,9 @@ const SEARCH_MANGA = `
 const FETCH_MANGA = `
   query FetchManga($id: Int) {
     Media(id: $id, type: MANGA) {
-      id
-      title {
+    id
+    type
+    title {
         romaji
         english
         native
@@ -87,7 +88,8 @@ const FETCH_MANGA = `
         nodes {
           mediaRecommendation {
             id
-            title { romaji english }
+            type
+            title {
             coverImage { large }
             averageScore
             genres

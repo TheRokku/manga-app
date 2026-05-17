@@ -89,9 +89,9 @@
       <div v-if="activeTab === 'anime' && !loading">
         <div v-if="savedAnime.length" class="flex flex-wrap gap-4">
           <MediaCard
-            v-for="m in savedAnime"
-            :key="m.id"
-            :media="m"
+            v-for="a in savedAnime"
+            :key="a.id"
+            :media="a"
             :selected-genres="[]"
           />
         </div>
@@ -125,6 +125,7 @@ const tabs = [
 
 async function fetchSavedMedia() {
   if (!userStore.user) return;
+
   loading.value = true;
 
   const mangaIds = favoritesStore.favorites
@@ -135,52 +136,86 @@ async function fetchSavedMedia() {
     .filter((f) => f.media_type === 'ANIME')
     .map((f) => f.media_id);
 
+  // FETCH MANGA
   if (mangaIds.length) {
-    const res = await fetch('https://graphql.anilist.co', {
+    const mangaRes = await fetch('https://graphql.anilist.co', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         query: `
           query ($ids: [Int]) {
             Page {
               media(id_in: $ids, type: MANGA) {
-                id type title { romaji english } coverImage { large } averageScore genres
+                id
+                type
+                title {
+                  romaji
+                  english
+                }
+                coverImage {
+                  large
+                }
+                averageScore
+                genres
               }
             }
           }
         `,
-        variables: { ids: mangaIds },
+        variables: {
+          ids: mangaIds,
+        },
       }),
     });
-    const json = await res.json();
-    savedManga.value = json.data?.Page?.media ?? [];
+
+    const mangaJson = await mangaRes.json();
+    savedManga.value = mangaJson.data?.Page?.media ?? [];
   } else {
     savedManga.value = [];
   }
 
+  // FETCH ANIME
+
   if (animeIds.length) {
-    const res = await fetch('https://graphql.anilist.co', {
+    const animeRes = await fetch('https://graphql.anilist.co', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         query: `
           query ($ids: [Int]) {
             Page {
               media(id_in: $ids, type: ANIME) {
-                id type title { romaji english } coverImage { large } averageScore genres
+                id
+                type
+                title {
+                  romaji
+                  english
+                }
+                coverImage {
+                  large
+                }
+                averageScore
+                genres
               }
             }
           }
         `,
-        variables: { ids: animeIds },
+        variables: {
+          ids: animeIds,
+        },
       }),
     });
-    const json = await res.json();
-    savedAnime.value = json.data?.Page?.media ?? [];
+
+    const animeJson = await animeRes.json();
+
+    savedAnime.value = animeJson.data?.Page?.media ?? [];
   } else {
     savedAnime.value = [];
   }
-
+  console.log(favoritesStore.favorites[0]);
   loading.value = false;
 }
 
