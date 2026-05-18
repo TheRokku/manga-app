@@ -48,7 +48,7 @@
         </button>
         <div
           class="flex flex-row bg-[#1C1C1C] pb-4 gap-2 mt-2 not-landscape:flex-col"
-          :class="isFiltersOpen ? 'flex ' : 'hidden '"
+          :class="isFiltersOpen ? 'flex' : 'hidden'"
         >
           <!-- Genre & Tags -->
           <div class="flex flex-col gap-1 overflow-visible">
@@ -76,7 +76,6 @@
                 class="z-40 absolute bg-border/95 rounded-b-md mt-1 w-70 text-nowrap"
               >
                 <div class="p-2">
-                  <!-- Search -->
                   <input
                     v-model="genreTagSearch"
                     type="text"
@@ -84,7 +83,6 @@
                     class="bg-bg border border-border rounded-sm px-3 py-2 text-sm w-full outline-accent focus:outline-1 mb-2"
                   />
                   <div class="max-h-72 overflow-y-scroll flex flex-col gap-3">
-                    <!-- Genres section -->
                     <div
                       v-if="
                         genres.filter((g) =>
@@ -120,7 +118,6 @@
                         {{ genre }}
                       </label>
                     </div>
-                    <!-- Tags by category -->
                     <template
                       v-for="(tags, category) in tagsByCategory"
                       :key="category"
@@ -150,15 +147,6 @@
                           :class="{ 'text-accent': selectedTags.includes(tag) }"
                         >
                           <input
-                            @click="
-                              () => {
-                                console.log('clicked', g);
-                                router.push({
-                                  path: '/manga',
-                                  query: { genres: [selectedGenres] },
-                                });
-                              }
-                            "
                             type="checkbox"
                             :value="tag"
                             v-model="selectedTags"
@@ -173,6 +161,7 @@
               </div>
             </div>
           </div>
+
           <!-- Format -->
           <div class="flex flex-col gap-1">
             <h2 class="text-low-accent text-sm font-semibold">Format</h2>
@@ -373,7 +362,7 @@
                 v-if="isSeasonOpen"
                 class="z-40 absolute bg-border/95 rounded-b-md mt-1 w-full"
               >
-                <div class="flex flex-col gap-1 p-2 relative">
+                <div class="flex flex-col gap-1 p-2">
                   <button
                     v-for="o in seasonOptions"
                     :key="o.value"
@@ -393,6 +382,7 @@
               </div>
             </div>
           </div>
+
           <!-- Sort -->
           <div class="flex flex-col gap-1">
             <h2 class="text-low-accent text-sm font-semibold">Sort By</h2>
@@ -435,14 +425,8 @@
 
     <!-- Anime cards -->
     <div class="px-4 sm:px-5 md:px-10 xl:px-11 my-8">
-      <h3
-        v-if="loading"
-        class="text-3xl xl:text-5xl text-accent font-bold font-heading pl-10"
-      >
-        Loading...
-      </h3>
       <p v-if="error" class="text-red-500">{{ error }}</p>
-      <div v-if="!loading" class="flex flex-wrap gap-2 justify-center">
+      <div class="flex flex-wrap gap-2 justify-center">
         <MediaCard
           v-for="a in anime"
           :key="a.id"
@@ -450,6 +434,20 @@
           :selected-genres="selectedGenres"
         />
       </div>
+      <h3
+        v-if="loading"
+        class="text-3xl xl:text-5xl text-accent font-bold font-heading text-center mt-8"
+      >
+        Loading...
+      </h3>
+      <p
+        v-if="!hasNextPage && !loading && anime.length"
+        class="text-center text-muted py-8 text-sm"
+      >
+        No more results
+      </p>
+      <!-- Sentinel -->
+      <div ref="sentinelRef" class="w-full h-10" />
     </div>
   </div>
 </template>
@@ -457,20 +455,23 @@
 <script setup>
 import MediaCard from '../../components/MediaCard.vue';
 import { onMounted, ref, watch, toRaw } from 'vue';
-import { useAnime } from '../../composables/useAnime.js'; // ← changed
+import { useAnime } from '../../composables/useAnime.js';
 import { useDebounceFn, onClickOutside } from '@vueuse/core';
 import { useGenres } from '../../composables/useGenres.js';
-import { Search, Delete, SlidersHorizontal, Scale } from 'lucide-vue-next';
+import { Search, Delete, SlidersHorizontal } from 'lucide-vue-next';
 import { useTags } from '../../composables/useTags.js';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const { tagsByCategory, fetchTags } = useTags();
 const { genres, fetchGenres } = useGenres();
-const { anime, loading, error, searchAnime } = useAnime(); // ← changed
+const { anime, hasNextPage, loading, error, searchAnime } = useAnime();
 
 const searchQuery = ref();
 const genreTagSearch = ref('');
+const currentPage = ref(1);
+const sentinelRef = ref(null);
+
 const selectedGenres = ref([]);
 const selectedTags = ref([]);
 const selectedSort = ref(['POPULARITY_DESC']);
@@ -489,13 +490,13 @@ const isFormatOpen = ref(false);
 const isYearOpen = ref(false);
 const isSeasonOpen = ref(false);
 
-const yearDropdownRef = ref(null);
-const seasonDropdownRef = ref(null);
 const dropdownRef = ref(null);
 const sortDropdownRef = ref(null);
 const statusDropdownRef = ref(null);
 const countryDropdownRef = ref(null);
 const formatDropdownRef = ref(null);
+const yearDropdownRef = ref(null);
+const seasonDropdownRef = ref(null);
 
 const sortOptions = [
   { label: 'Most Popular', value: 'POPULARITY_DESC' },
@@ -539,28 +540,17 @@ const years = Array.from(
   (_, i) => new Date().getFullYear() - i,
 );
 
-// ...all refs identical to MangaBrowse...
-onClickOutside(seasonDropdownRef, () => (isSeasonOpen.value = false));
 onClickOutside(dropdownRef, () => (isOpen.value = false));
 onClickOutside(sortDropdownRef, () => (isSortOpen.value = false));
 onClickOutside(statusDropdownRef, () => (isStatusOpen.value = false));
 onClickOutside(countryDropdownRef, () => (isCountryOpen.value = false));
 onClickOutside(yearDropdownRef, () => (isYearOpen.value = false));
 onClickOutside(formatDropdownRef, () => (isFormatOpen.value = false));
+onClickOutside(seasonDropdownRef, () => (isSeasonOpen.value = false));
 
-// ...all onClickOutside, years, sortOptions, statusOptions, countryOptions identical...
-
-onMounted(() => {
-  if (route.query.genre) {
-    selectedGenres.value = [route.query.genre];
-  }
-  searchAnime(buildSearch()); // ← changed
-  fetchGenres();
-  fetchTags();
-});
-
-function buildSearch() {
+function buildSearch(page = currentPage.value) {
   return {
+    page,
     search: searchQuery.value?.trim() || null,
     genres: selectedGenres.value.length ? toRaw(selectedGenres.value) : null,
     tags: selectedTags.value.length ? toRaw(selectedTags.value) : null,
@@ -578,14 +568,42 @@ function buildSearch() {
   };
 }
 
-const debouncedSearch = useDebounceFn(() => searchAnime(buildSearch()), 400); // ← changed
+function resetAndSearch() {
+  currentPage.value = 1;
+  searchAnime(buildSearch(1), false);
+}
 
-watch(selectedGenres, () => searchAnime(buildSearch()), { deep: true }); // ← changed (×7)
-watch(selectedTags, () => searchAnime(buildSearch()), { deep: true });
-watch(selectedSort, () => searchAnime(buildSearch()));
-watch(selectedStatus, () => searchAnime(buildSearch()));
-watch(selectedCountry, () => searchAnime(buildSearch()));
-watch(selectedFormat, () => searchAnime(buildSearch()), { deep: true });
-watch(selectedYear, () => searchAnime(buildSearch()));
-watch(selectedSeason, () => searchAnime(buildSearch()));
+const debouncedSearch = useDebounceFn(resetAndSearch, 400);
+
+watch(selectedGenres, resetAndSearch, { deep: true });
+watch(selectedTags, resetAndSearch, { deep: true });
+watch(selectedSort, resetAndSearch);
+watch(selectedStatus, resetAndSearch);
+watch(selectedCountry, resetAndSearch);
+watch(selectedFormat, resetAndSearch, { deep: true });
+watch(selectedYear, resetAndSearch);
+watch(selectedSeason, resetAndSearch);
+
+onMounted(() => {
+  if (route.query.genre) {
+    selectedGenres.value = [route.query.genre];
+  }
+  searchAnime(buildSearch(1), false);
+  fetchGenres();
+  fetchTags();
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasNextPage.value && !loading.value) {
+        currentPage.value++;
+        searchAnime(buildSearch(), true);
+      }
+    },
+    { threshold: 0.1 },
+  );
+
+  setTimeout(() => {
+    if (sentinelRef.value) observer.observe(sentinelRef.value);
+  }, 500);
+});
 </script>

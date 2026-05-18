@@ -1,5 +1,5 @@
 import { useAnilist } from './useAnilist.js';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const SEARCH_MANGA = `
   query SearchManga(
@@ -15,6 +15,9 @@ const SEARCH_MANGA = `
     $startDate_lesser: FuzzyDateInt
   ) {
     Page(page: $page, perPage: 20) {
+      pageInfo {
+        hasNextPage
+      }
       media(
         search: $search,
         genre_in: $genres,
@@ -55,9 +58,9 @@ const SEARCH_MANGA = `
 const FETCH_MANGA = `
   query FetchManga($id: Int) {
     Media(id: $id, type: MANGA) {
-    id
-    type
-    title {
+      id
+      type
+      title {
         romaji
         english
         native
@@ -90,6 +93,9 @@ const FETCH_MANGA = `
             id
             type
             title {
+              romaji
+              english
+            }
             coverImage { large }
             averageScore
             genres
@@ -102,19 +108,24 @@ const FETCH_MANGA = `
 
 export function useManga() {
   const { results, loading, error, query } = useAnilist();
+  const manga = ref([]);
+  const hasNextPage = ref(true);
 
-  async function searchManga({
-    search = null,
-    genres = null,
-    tags = null,
-    format = null,
-    sort = ['POPULARITY_DESC'],
-    page = 1,
-    status = null,
-    countryOfOrigin = null,
-    startDate_greater = null,
-    startDate_lesser = null,
-  } = {}) {
+  async function searchManga(
+    {
+      search = null,
+      genres = null,
+      tags = null,
+      format = null,
+      sort = ['POPULARITY_DESC'],
+      page = 1,
+      status = null,
+      countryOfOrigin = null,
+      startDate_greater = null,
+      startDate_lesser = null,
+    } = {},
+    append = false,
+  ) {
     await query(SEARCH_MANGA, {
       search,
       genres,
@@ -127,6 +138,10 @@ export function useManga() {
       startDate_greater,
       startDate_lesser,
     });
+
+    const newResults = results.value?.Page?.media ?? [];
+    manga.value = append ? [...manga.value, ...newResults] : newResults;
+    hasNextPage.value = results.value?.Page?.pageInfo?.hasNextPage ?? false;
   }
 
   async function fetchManga({ id }) {
@@ -135,7 +150,13 @@ export function useManga() {
 
   const mangaDetail = computed(() => results.value?.Media ?? null);
 
-  const manga = computed(() => results.value?.Page?.media ?? []);
-
-  return { manga, mangaDetail, loading, error, searchManga, fetchManga };
+  return {
+    manga,
+    hasNextPage,
+    mangaDetail,
+    loading,
+    error,
+    searchManga,
+    fetchManga,
+  };
 }

@@ -1,5 +1,5 @@
 import { useAnilist } from './useAnilist.js';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const SEARCH_ANIME = `
   query SearchAnime(
@@ -16,6 +16,9 @@ const SEARCH_ANIME = `
     $season: MediaSeason
     ) {
     Page(page: $page, perPage: 20) {
+      pageInfo{
+        hasNextPage
+      }
       media(
       search: $search,
       genre_in: $genres,
@@ -103,20 +106,25 @@ const FETCH_ANIME = `
 
 export function useAnime() {
   const { results, loading, error, query } = useAnilist();
+  const anime = ref([]);
+  const hasNextPage = ref(true);
 
-  async function searchAnime({
-    search = null,
-    genres = null,
-    tags = null,
-    format = null,
-    sort = ['POPULARITY_DESC'],
-    page = 1,
-    status = null,
-    season = null,
-    countryOfOrigin = null,
-    startDate_greater = null,
-    startDate_lesser = null,
-  } = {}) {
+  async function searchAnime(
+    {
+      search = null,
+      genres = null,
+      tags = null,
+      format = null,
+      sort = ['POPULARITY_DESC'],
+      page = 1,
+      status = null,
+      season = null,
+      countryOfOrigin = null,
+      startDate_greater = null,
+      startDate_lesser = null,
+    } = {},
+    append = false,
+  ) {
     await query(SEARCH_ANIME, {
       search,
       genres,
@@ -130,6 +138,10 @@ export function useAnime() {
       startDate_greater,
       startDate_lesser,
     });
+
+    const newResults = results.value?.Page?.media ?? [];
+    anime.value = append ? [...anime.value, ...newResults] : newResults;
+    hasNextPage.value = results.value?.Page?.pageInfo?.hasNextPage ?? false;
   }
 
   async function fetchAnime({ id }) {
@@ -138,7 +150,13 @@ export function useAnime() {
 
   const animeDetail = computed(() => results.value?.Media ?? null);
 
-  const anime = computed(() => results.value?.Page?.media ?? []);
-
-  return { anime, animeDetail, loading, error, searchAnime, fetchAnime };
+  return {
+    anime,
+    hasNextPage,
+    animeDetail,
+    loading,
+    error,
+    searchAnime,
+    fetchAnime,
+  };
 }

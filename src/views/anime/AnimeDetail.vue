@@ -54,7 +54,7 @@
           />
           <div
             v-if="animeDetail.averageScore"
-            class="absolute top-2 right-2 bg-bg/90 px-3 py-2 rounded-md text-center"
+            class="absolute top-2 right-2 z-40 bg-bg/90 px-3 py-2 rounded-md text-center"
           >
             <p class="text-accent font-bold font-heading text-xl">
               {{ animeDetail.averageScore / 10 }}
