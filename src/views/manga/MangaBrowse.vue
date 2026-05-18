@@ -533,9 +533,14 @@ onMounted(() => {
 
   const observer = new IntersectionObserver(
     (entries) => {
-      if (entries[0].isIntersecting && hasNextPage.value && !loading.value) {
+      if (
+        entries[0].isIntersecting &&
+        hasNextPage.value &&
+        !loading.value &&
+        anime.value.length > 0 // ← don't trigger until first page is loaded
+      ) {
         currentPage.value++;
-        searchManga(buildSearch(), true);
+        searchAnime(buildSearch(), true);
       }
     },
     { threshold: 0.1 },
