@@ -568,9 +568,12 @@ function buildSearch(page = currentPage.value) {
   };
 }
 
+const initialized = ref(false);
+
 function resetAndSearch() {
+  if (!initialized.value) return;
   currentPage.value = 1;
-  searchAnime(buildSearch(1), false);
+  searchManga(buildSearch(1), false);
 }
 
 const debouncedSearch = useDebounceFn(resetAndSearch, 400);
@@ -588,9 +591,10 @@ onMounted(() => {
   if (route.query.genre) {
     selectedGenres.value = [route.query.genre];
   }
-  searchAnime(buildSearch(1), false);
+  searchManga(buildSearch(1), false);
   fetchGenres();
   fetchTags();
+  initialized.value = true; // watches are now allowed to fire
 
   const isFetching = ref(false);
 

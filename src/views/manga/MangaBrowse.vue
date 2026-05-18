@@ -508,7 +508,10 @@ function buildSearch(page = currentPage.value) {
   };
 }
 
+const initialized = ref(false);
+
 function resetAndSearch() {
+  if (!initialized.value) return;
   currentPage.value = 1;
   searchManga(buildSearch(1), false);
 }
@@ -530,6 +533,7 @@ onMounted(() => {
   searchManga(buildSearch(1), false);
   fetchGenres();
   fetchTags();
+  initialized.value = true; // watches are now allowed to fire
 
   const isFetching = ref(false);
 
