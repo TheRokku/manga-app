@@ -592,16 +592,21 @@ onMounted(() => {
   fetchGenres();
   fetchTags();
 
+  const isFetching = ref(false);
+
   const observer = new IntersectionObserver(
-    (entries) => {
+    async (entries) => {
       if (
         entries[0].isIntersecting &&
         hasNextPage.value &&
         !loading.value &&
-        anime.value.length > 0 // ← don't trigger until first page is loaded
+        !isFetching.value &&
+        anime.value.length > 0
       ) {
+        isFetching.value = true;
         currentPage.value++;
-        searchAnime(buildSearch(), true);
+        await searchAnime(buildSearch(), true);
+        isFetching.value = false;
       }
     },
     { threshold: 0.1 },
