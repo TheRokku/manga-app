@@ -591,7 +591,7 @@ onMounted(() => {
   if (route.query.genre) {
     selectedGenres.value = [route.query.genre];
   }
-  searchManga(buildSearch(1), false);
+  searchAnime(buildSearch(1), false);
   fetchGenres();
   fetchTags();
   initialized.value = true; // watches are now allowed to fire
