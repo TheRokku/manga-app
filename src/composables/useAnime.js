@@ -73,6 +73,11 @@ const FETCH_ANIME = `
         large
         extraLarge
       }
+      trailer {
+        id
+        site
+        thumbnail
+      }
       bannerImage
       description(asHtml: false)
       status
