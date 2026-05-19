@@ -379,9 +379,11 @@
     </div>
 
     <!-- Manga cards -->
-    <div class="px-4 sm:px-5 md:px-10 xl:px-11 my-8">
+    <div class="px-4 max-sm:px-4 max-md:px-10 max-xl:px-11 my-8">
       <p v-if="error" class="text-red-500">{{ error }}</p>
-      <div class="flex flex-wrap gap-2 justify-center">
+      <div
+        class="flex flex-wrap gap-2 max-sm:gap-2 w-full justify-center max-sm:grid max-sm:grid-cols-2"
+      >
         <MediaCard
           v-for="m in manga"
           :key="m.id"
@@ -544,11 +546,11 @@ onMounted(() => {
         hasNextPage.value &&
         !loading.value &&
         !isFetching.value &&
-        anime.value.length > 0
+        manga.value.length > 0
       ) {
         isFetching.value = true;
         currentPage.value++;
-        await searchAnime(buildSearch(), true);
+        await searchManga(buildSearch(), true);
         isFetching.value = false;
       }
     },

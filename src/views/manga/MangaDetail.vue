@@ -27,40 +27,23 @@
       <div class="flex flex-col md:flex-row gap-8 px-8 py-10">
         <!-- Cover -->
         <div class="relative shrink-0">
-          <button
-            @click.stop="toggleFavorite"
+          <div
             class="absolute top-2 left-2 z-10 rounded-md hover:bg-accent/20 hover:cursor-pointer transition-colors"
           >
-            <Heart
-              :size="30"
-              :color="'#e8b923'"
-              stroke-width="3"
-              :fill="
-                favoritesStore.isFavorite(mangaDetail.id, 'MANGA')
-                  ? 'currentColor'
-                  : 'none'
-              "
-              :class="
-                favoritesStore.isFavorite(mangaDetail.id, 'MANGA')
-                  ? 'text-accent'
-                  : 'text-white'
-              "
-              class="transition-colors"
-            />
-          </button>
+            <div
+              v-if="mangaDetail.averageScore"
+              class="relative bg-bg/90 px-3 py-2 rounded-md text-center"
+            >
+              <p class="text-accent font-bold font-heading text-xl">
+                {{ mangaDetail.averageScore / 10 }}
+              </p>
+              <p class="text-muted text-xs tracking-widest">SCORE</p>
+            </div>
+          </div>
           <img
             :src="mangaDetail.coverImage.large"
             class="w-52 md:w-64 rounded-sm object-cover"
           />
-          <div
-            v-if="mangaDetail.averageScore"
-            class="absolute top-2 right-2 bg-bg/90 px-3 py-2 rounded-md text-center"
-          >
-            <p class="text-accent font-bold font-heading text-xl">
-              {{ mangaDetail.averageScore / 10 }}
-            </p>
-            <p class="text-muted text-xs tracking-widest">SCORE</p>
-          </div>
         </div>
 
         <!-- Info -->
@@ -141,9 +124,30 @@
               <Play :size="14" fill="currentColor" /> WATCH TRAILER
             </button>
             <button
-              class="border-2 border-accent text-accent font-heading font-black px-6 py-3 text-sm tracking-widest flex items-center gap-2 hover:bg-accent/10 transition-colors"
+              @click="toggleFavorite"
+              class="border-2 border-accent text-accent font-heading font-black px-8 py-3 text-sm tracking-widest flex items-center align-middle text-center gap-2 hover:bg-accent/10 transition-colors"
             >
-              <Plus :size="14" /> ADD TO ARCHIVE
+              <Heart
+                :size="18"
+                :color="'#e8b923'"
+                stroke-width="2"
+                :fill="
+                  favoritesStore.isFavorite(mangaDetail.id, 'MANGA')
+                    ? 'currentColor'
+                    : 'none'
+                "
+                :class="
+                  favoritesStore.isFavorite(mangaDetail.id, 'MANGA')
+                    ? 'text-accent'
+                    : 'text-white'
+                "
+                class="transition-colors mb-0.5"
+              />
+              {{
+                favoritesStore.isFavorite(mangaDetail.id, 'MANGA')
+                  ? 'SAVED'
+                  : 'ADD TO ARCHIVE'
+              }}
             </button>
           </div>
         </div>

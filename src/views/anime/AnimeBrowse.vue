@@ -424,9 +424,11 @@
     </div>
 
     <!-- Anime cards -->
-    <div class="px-4 sm:px-5 md:px-10 xl:px-11 my-8">
+    <div class="px-4 max-sm:px-4 max-md:px-10 max-xl:px-11 my-8">
       <p v-if="error" class="text-red-500">{{ error }}</p>
-      <div class="flex flex-wrap gap-2 justify-center">
+      <div
+        class="flex flex-wrap gap-2 max-sm:gap-2 w-full justify-center max-sm:grid max-sm:grid-cols-2"
+      >
         <MediaCard
           v-for="a in anime"
           :key="a.id"
@@ -442,7 +444,7 @@
       </h3>
       <p
         v-if="!hasNextPage && !loading && anime.length"
-        class="text-center text-muted py-8 text-sm"
+        class="text-center text-muted py-8 text-md"
       >
         No more results
       </p>
@@ -573,7 +575,7 @@ const initialized = ref(false);
 function resetAndSearch() {
   if (!initialized.value) return;
   currentPage.value = 1;
-  searchManga(buildSearch(1), false);
+  searchAnime(buildSearch(1), false);
 }
 
 const debouncedSearch = useDebounceFn(resetAndSearch, 400);

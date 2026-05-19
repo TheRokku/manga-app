@@ -3,7 +3,7 @@
     :title="
       [media.title.romaji, media.title.english].filter(Boolean).join('\n')
     "
-    class="relative bg-bg shadow-2xl w-72 h-96 max-sm:w-full max-sm:h-125 rounded-md overflow-hidden font-heading hover:*:bg-bg/80 xl:hover:scale-x-105 xl:hover:scale-y-105 xl:hover:z-20 xl:hover:-rotate-1 xl:hover:*:rotate-0 xl:hover:shadow-accent/40 transition-all hover:cursor-pointer border-2 border-border hover:border-accent-hover hover:border-4"
+    class="relative bg-bg shadow-2xl w-72 h-96 max-sm:w-full max-sm:h-80 rounded-md overflow-hidden font-heading hover:*:bg-bg/80 xl:hover:scale-x-105 xl:hover:scale-y-105 xl:hover:z-20 xl:hover:-rotate-1 xl:hover:*:rotate-0 xl:hover:shadow-accent/40 transition-all hover:cursor-pointer border-2 border-border hover:border-accent-hover hover:border-4"
   >
     <button
       @click.stop="toggleFavorite"
