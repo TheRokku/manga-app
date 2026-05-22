@@ -34,7 +34,7 @@
       }}</span>
     </div>
 
-    <RouterLink :to="mediaType + '/' + media.id">
+    <RouterLink :to="'/' + mediaType + '/' + media.id">
       <img
         :src="media.coverImage.large"
         :alt="media.title.romaji"
@@ -48,7 +48,7 @@
     <div
       class="absolute bottom-0 left-0 right-0 bg-border/80 p-2 transition-colors duration-150"
     >
-      <RouterLink :to="mediaType + '/' + media.id">
+      <RouterLink :to="'/' + mediaType + '/' + media.id">
         <pre v-if="media.title.romaji" class="text-accent text-md font-bold">{{
           media.title.romaji
         }}</pre>
