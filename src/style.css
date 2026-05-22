@@ -20,6 +20,8 @@ body {
   color: white;
   overflow-x: hidden;
   font-family: var(--font-body);
+  scrollbar-color: var(--color-accent-hover);
+  scrollbar-highlight-color: var(--color-accent-hover);
   ::selection {
     background-color: #e8b923;
     color: #000;
