@@ -24,7 +24,6 @@
           >
             BROWSE
           </p>
-
           <div
             class="absolute -left-1/2 top-full pt-2 scale-0 group-hover:scale-100 group-focus:scale-100 transition-all z-50"
           >
@@ -32,21 +31,17 @@
               <RouterLink
                 to="/manga"
                 class="nav-link hover:text-accent-hover transition-all"
+                >BROWSE MANGA</RouterLink
               >
-                BROWSE MANGA
-              </RouterLink>
-
               <RouterLink
                 to="/anime"
                 class="nav-link hover:text-accent-hover transition-all"
+                >BROWSE ANIME</RouterLink
               >
-                BROWSE ANIME
-              </RouterLink>
             </div>
           </div>
         </div>
       </div>
-
       <RouterLink
         to="/profile"
         class="nav-link hover:text-accent-hover transition-all"
@@ -64,7 +59,48 @@
       <RouterLink to="/profile" class="hover:text-accent transition-all">
         <Bell :size="22" :strokeWidth="2.5" />
       </RouterLink>
-      <RouterLink to="/profile" class="hover:text-accent transition-all">
+
+      <!-- Logged in: user dropdown -->
+      <div v-if="userStore.user" class="relative group inline-block">
+        <RouterLink
+          to="/profile"
+          class="text-sm hover:text-accent transition-colors"
+        >
+          <button
+            class="hover:text-accent transition-all flex items-center gap-2"
+          >
+            <CircleUser :size="28" />
+            <span
+              class="text-sm text-muted group-hover:text-accent transition-colors"
+            >
+              {{ userStore.user.email.split('@')[0] }}
+            </span>
+          </button>
+        </RouterLink>
+        <div
+          class="absolute right-0 top-full w-full pt-2 scale-0 group-hover:scale-100 transition-all z-50"
+        >
+          <div
+            class="flex flex-col gap-2 bg-bg/90 border border-border p-3 rounded-sm min-w-max"
+          >
+            <RouterLink
+              to="/profile"
+              class="text-sm hover:text-accent transition-colors"
+              >My Profile</RouterLink
+            >
+            <div class="w-full h-0.5 bg-muted"></div>
+            <button
+              @click="handleSignOut"
+              class="text-sm text-left hover:text-accent transition-colors cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logged out -->
+      <RouterLink v-else to="/login" class="hover:text-accent transition-all">
         <CircleUser :size="28" />
       </RouterLink>
     </div>
@@ -114,7 +150,8 @@
       @click="menuOpen = false"
       >MY LIST</RouterLink
     >
-    <div class="flex gap-4 pt-2 justify-left items-center">
+
+    <div class="flex gap-4 pt-2 items-center border-t border-border">
       <RouterLink
         to="/profile"
         class="hover:text-accent transition-all"
@@ -122,12 +159,24 @@
       >
         <CircleUser :size="28" />
       </RouterLink>
+      <div v-if="userStore.user" class="flex flex-col gap-1">
+        <span class="text-sm text-accent">{{
+          userStore.user.email.split('@')[0]
+        }}</span>
+        <button
+          @click="handleSignOut"
+          class="text-sm text-left hover:text-accent transition-colors"
+        >
+          Sign Out
+        </button>
+      </div>
       <RouterLink
-        to="/notifications"
-        class="hover:text-accent transition-all"
+        v-else
+        to="/login"
+        class="text-sm hover:text-accent transition-all"
         @click="menuOpen = false"
       >
-        <Bell :size="22" :strokeWidth="2.5" />
+        Sign In
       </RouterLink>
     </div>
   </div>
@@ -136,8 +185,21 @@
 <script setup>
 import { ref } from 'vue';
 import { Bell, CircleUser, Menu, X } from 'lucide-vue-next';
+import { useUserStore } from '../stores/user.js';
+import { useRouter } from 'vue-router';
 
 const menuOpen = ref(false);
+const userStore = useUserStore();
+const router = useRouter();
+
+async function handleSignOut() {
+  const signOutConfirmation = confirm('Are you sure you want to Sign Out?');
+  if (signOutConfirmation) {
+    await userStore.signOut();
+    menuOpen.value = false;
+    router.push('/');
+  }
+}
 </script>
 
 <style scoped>
