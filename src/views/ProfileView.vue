@@ -24,17 +24,34 @@
       <div
         class="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-6 py-6 sm:py-10 relative text-center sm:text-left"
       >
+        <!-- Avatar -->
         <div
-          class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-border flex items-center justify-center shrink-0"
+          class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-border flex items-center justify-center shrink-0 overflow-hidden"
         >
-          <CircleUser :size="40" class="text-muted sm:hidden" />
-          <CircleUser :size="48" class="text-muted hidden sm:block" />
+          <img
+            v-if="userStore.profile?.avatar_url"
+            :src="userStore.profile.avatar_url"
+            class="w-full h-full object-cover"
+          />
+          <CircleUser v-else :size="48" class="text-muted" />
         </div>
+
         <div class="flex-1 min-w-0">
           <h1
-            class="font-heading font-black text-2xl sm:text-4xl uppercase truncate"
+            class="font-heading font-black text-2xl sm:text-4xl uppercase truncate w-full flex flex-wrap gap-4 items-center"
           >
-            {{ userStore.user.email.split('@')[0] }}
+            {{
+              userStore.profile?.username || userStore.user.email.split('@')[0]
+            }}
+            <p
+              v-if="
+                userStore.profile.username === 'TheRokkunn' ||
+                userStore.user.email === 'axelbarriosemanuel.2016@gmail.com'
+              "
+              class="px-4 text-accent max-w-fit rounded-sm"
+            >
+              Admin
+            </p>
           </h1>
           <p
             class="text-muted text-xs sm:text-sm tracking-widest uppercase mt-1"
@@ -50,7 +67,9 @@
             </div>
           </div>
         </div>
+
         <button
+          @click="openEdit"
           class="sm:ml-auto border border-border text-muted font-heading font-bold text-sm px-4 py-2 tracking-widest hover:border-accent hover:text-accent transition-colors w-full sm:w-auto"
         >
           EDIT PROFILE
@@ -74,7 +93,6 @@
         </button>
       </div>
 
-      <!-- Loading -->
       <p
         v-if="loading"
         class="text-accent font-heading font-black text-2xl sm:text-3xl"
@@ -86,7 +104,7 @@
       <div v-if="activeTab === 'manga' && !loading">
         <div
           v-if="savedManga.length"
-          class="flex flex-wrap gap-2 max-sm:gap-2 w-full justify-center max-sm:grid max-sm:grid-cols-2"
+          class="flex flex-wrap gap-2 justify-center"
         >
           <MediaCard
             v-for="m in savedManga"
@@ -104,7 +122,7 @@
       <div v-if="activeTab === 'anime' && !loading">
         <div
           v-if="savedAnime.length"
-          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4"
+          class="flex flex-wrap gap-2 justify-center"
         >
           <MediaCard
             v-for="a in savedAnime"
@@ -116,6 +134,84 @@
         <p v-else class="text-muted font-heading font-bold text-lg sm:text-xl">
           No saved anime yet.
         </p>
+      </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div
+      v-if="editOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+      @click.self="editOpen = false"
+    >
+      <div
+        class="bg-card border border-border rounded-sm p-6 w-full max-w-md mx-4 flex flex-col gap-5"
+      >
+        <h2 class="font-heading font-black text-xl tracking-widest">
+          EDIT PROFILE
+        </h2>
+
+        <!-- Avatar upload -->
+        <div class="flex flex-col gap-2">
+          <label class="text-muted text-xs font-bold tracking-widest uppercase"
+            >Avatar</label
+          >
+          <div class="flex items-center gap-4">
+            <div
+              class="w-16 h-16 rounded-full bg-border overflow-hidden flex items-center justify-center shrink-0"
+            >
+              <img
+                v-if="avatarPreview"
+                :src="avatarPreview"
+                class="w-full h-full object-cover"
+              />
+              <CircleUser v-else :size="32" class="text-muted" />
+            </div>
+            <label
+              class="border border-border text-muted text-sm font-heading font-bold px-4 py-2 cursor-pointer hover:border-accent hover:text-accent transition-colors"
+            >
+              CHOOSE FILE
+              <input
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="onAvatarChange"
+              />
+            </label>
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div class="flex flex-col gap-2">
+          <label class="text-muted text-xs font-bold tracking-widest uppercase"
+            >Username</label
+          >
+          <input
+            v-model="editUsername"
+            type="text"
+            placeholder="Enter username..."
+            class="bg-border py-2 px-3 rounded-sm outline-accent focus:outline-2 transition-all text-sm"
+          />
+        </div>
+
+        <!-- Error -->
+        <p v-if="editError" class="text-red-500 text-sm">{{ editError }}</p>
+
+        <!-- Actions -->
+        <div class="flex gap-3 mt-2">
+          <button
+            @click="saveProfile"
+            :disabled="editSaving"
+            class="bg-accent text-bg font-heading font-black px-6 py-3 text-sm tracking-widest hover:bg-accent-hover transition-colors disabled:opacity-50"
+          >
+            {{ editSaving ? 'SAVING...' : 'SAVE' }}
+          </button>
+          <button
+            @click="editOpen = false"
+            class="border border-border text-muted font-heading font-bold px-6 py-3 text-sm tracking-widest hover:border-accent hover:text-accent transition-colors"
+          >
+            CANCEL
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -141,93 +237,95 @@ const tabs = [
   { key: 'anime', label: 'SAVED ANIME' },
 ];
 
+// Edit modal state
+const editOpen = ref(false);
+const editUsername = ref('');
+const avatarFile = ref(null);
+const avatarPreview = ref(null);
+const editSaving = ref(false);
+const editError = ref('');
+
+function openEdit() {
+  editUsername.value = userStore.profile?.username ?? '';
+  avatarPreview.value = userStore.profile?.avatar_url ?? null;
+  avatarFile.value = null;
+  editError.value = '';
+  editOpen.value = true;
+}
+
+function onAvatarChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    editError.value = 'Image must be under 2MB';
+    return;
+  }
+  if (
+    !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)
+  ) {
+    editError.value = 'Only JPEG, PNG, WebP, or GIF allowed';
+    return;
+  }
+
+  editError.value = '';
+  avatarFile.value = file;
+  avatarPreview.value = URL.createObjectURL(file);
+}
+
+async function saveProfile() {
+  editSaving.value = true;
+  editError.value = '';
+  try {
+    await userStore.updateProfile({
+      username: editUsername.value,
+      avatarFile: avatarFile.value,
+    });
+    editOpen.value = false;
+  } catch (e) {
+    editError.value = e.message;
+  } finally {
+    editSaving.value = false;
+  }
+}
+
 async function fetchSavedMedia() {
   if (!userStore.user) return;
-
   loading.value = true;
 
   const mangaIds = favoritesStore.favorites
     .filter((f) => f.media_type === 'MANGA')
     .map((f) => f.media_id);
-
   const animeIds = favoritesStore.favorites
     .filter((f) => f.media_type === 'ANIME')
     .map((f) => f.media_id);
 
-  // FETCH MANGA
   if (mangaIds.length) {
-    const mangaRes = await fetch('https://graphql.anilist.co', {
+    const res = await fetch('https://graphql.anilist.co', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        query: `
-          query ($ids: [Int]) {
-            Page {
-              media(id_in: $ids, type: MANGA) {
-                id
-                type
-                title {
-                  romaji
-                  english
-                }
-                coverImage {
-                  large
-                }
-                averageScore
-                genres
-              }
-            }
-          }
-        `,
-        variables: {
-          ids: mangaIds,
-        },
+        query: `query ($ids: [Int]) { Page { media(id_in: $ids, type: MANGA) { id type title { romaji english } coverImage { large } averageScore genres } } }`,
+        variables: { ids: mangaIds },
       }),
     });
-
-    const mangaJson = await mangaRes.json();
-    savedManga.value = mangaJson.data?.Page?.media ?? [];
+    const json = await res.json();
+    savedManga.value = json.data?.Page?.media ?? [];
   } else {
     savedManga.value = [];
   }
 
-  // FETCH ANIME
   if (animeIds.length) {
-    const animeRes = await fetch('https://graphql.anilist.co', {
+    const res = await fetch('https://graphql.anilist.co', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        query: `
-          query ($ids: [Int]) {
-            Page {
-              media(id_in: $ids, type: ANIME) {
-                id
-                type
-                title {
-                  romaji
-                  english
-                }
-                coverImage {
-                  large
-                }
-                averageScore
-                genres
-              }
-            }
-          }
-        `,
-        variables: {
-          ids: animeIds,
-        },
+        query: `query ($ids: [Int]) { Page { media(id_in: $ids, type: ANIME) { id type title { romaji english } coverImage { large } averageScore genres } } }`,
+        variables: { ids: animeIds },
       }),
     });
-
-    const animeJson = await animeRes.json();
-    savedAnime.value = animeJson.data?.Page?.media ?? [];
+    const json = await res.json();
+    savedAnime.value = json.data?.Page?.media ?? [];
   } else {
     savedAnime.value = [];
   }

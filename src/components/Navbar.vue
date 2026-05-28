@@ -73,7 +73,10 @@
             <span
               class="text-sm text-muted group-hover:text-accent transition-colors"
             >
-              {{ userStore.user.email.split('@')[0] }}
+              {{
+                userStore.profile?.username ||
+                userStore.user.email.split('@')[0]
+              }}
             </span>
           </button>
         </RouterLink>
